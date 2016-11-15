@@ -61,6 +61,22 @@ class BaseNotification(object):
         else:
             self.filters = [(k, v) for k, v in six.iteritems(_filters)]
 
+        # Check if a source account has been added for the event.
+        if 'source_account' in self.settings and self.settings['source_account']:
+            account = self.settings['source_account']
+            account_match = re.match("^[0-9]{12}$", account)
+            if account_match:
+                self.source_account = account
+            else:
+                raise exceptions.ResourceValidationError(
+                    (
+                        "The source account for the event must be a "
+                        "12 digit number: {}"
+                    ).format(account)
+                )
+        else:
+            self.source_account = troposphere.Ref(troposphere.AWS_ACCOUNT_ID)
+
     @classmethod
     def from_dict(cls, data, id, bucket_notification_configuration):
         notification_type = set(('lambda', 'topic', 'queue')) & set(data.keys())
@@ -103,7 +119,7 @@ class LambdaFunctionNotification(BaseNotification):
                 Action="lambda:InvokeFunction",
                 FunctionName=self.get_destination_arn(),
                 Principal="s3.amazonaws.com",
-                SourceAccount=troposphere.Ref(troposphere.AWS_ACCOUNT_ID),
+                SourceAccount=self.source_account,
                 SourceArn=self.bucket_notification_configuration.get_bucket_arn()
             )
         )

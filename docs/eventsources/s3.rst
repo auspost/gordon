@@ -45,6 +45,7 @@ Anatomy of the integration
            key_filters:
              prefix: { STRING }
              suffix: { STRING }
+           source_account: { ACCOUNT_ID }
 
 
 
@@ -215,6 +216,18 @@ Description                  Map of filters you want to apply
 Filters are optional to all notifications. The current AWS API only allows you to filter events by the key's ``prefix`` and ``suffix``. One notification can't define
 more than one of each (``prefix`` and ``suffix``) and  filters in a bucket can't overlap one to each other.``prefix`` and ``suffix`` value and can be either a ``string`` or a ``references``.
 
+Source Account
+^^^^^^^^^^^^^^^^^^^^^^
+
+===========================  ============================================================================================================
+Name                         ``source_account``
+Required                     No
+Valid types                  ``string``
+Description                  Account name where event will be triggered
+===========================  ============================================================================================================
+
+Source Accounts are optional to all notifications. If the ``source_account`` is not defined, it will default to the current account (resulting in a value of ``AWS::AccountId`` in the generated CloudFormation template)
+
 
 Full Example
 ----------------------------------
@@ -233,6 +246,7 @@ Full Example
           key_filters:
             prefix: cat_
             suffix: .png
+          source_account: 123456789012
 
         queue_on_remove_dog:
           queue: removed_dogs_queue
